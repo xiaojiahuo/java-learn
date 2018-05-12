@@ -1,1 +1,0 @@
-package org.laidu.learn.design.pattern.prototype;

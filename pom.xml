@@ -8,6 +8,36 @@
     <artifactId>java-learn</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+    <name>java-learn</name>
+    <url>https://github.com/laidu/java-learn</url>
+    <description>java 程序员的学习成长之路</description>
+
+    <scm>
+        <url>https://github.com/laidu/java-learn</url>
+        <connection>scm:git:git@github.com:laidu/java-learn.git</connection>
+        <developerConnection>scm:git:git@github.com:laidu/java-learn.git</developerConnection>
+        <!--<tag>master</tag>-->
+    </scm>
+
+    <ciManagement>
+        <system>Hudson</system>
+        <url></url>
+    </ciManagement>
+
+    <developers>
+        <developer>
+            <id>tiancai.zang</id>
+            <name>臧天才</name>
+            <email>laidu823@gmail.com</email>
+            <timezone>8</timezone>
+        </developer>
+    </developers>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/laidu/java-learn/issues</url>
+    </issueManagement>
+
 
     <modules>
         <module>language-feature</module>
@@ -17,30 +47,53 @@
         <module>data-structure</module>
         <module>algorithm</module>
         <module>production-component</module>
-        <module>shared-resource</module>
+        <module>language-advance</module>
+        <module>dev-ops</module>
+        <module>big-data</module>
+        <module>code-practice</module>
     </modules>
+
+    <distributionManagement>
+        <site>
+            <id>github-pages-site</id>
+            <name>java-learn</name>
+            <url>docs</url>
+        </site>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
     <properties>
 
+        <java.version>1.8</java.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven-compiler-plugin.version>3.6.2</maven-compiler-plugin.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!--mvn site-->
         <github.global.server>github</github.global.server>
+        <github.global.oauth2Token>${env.GITHUB_OAUTH_TOKEN}</github.global.oauth2Token> <!-- 通过获取环境变量设置token 适应travis-ci 自动部署-->
+        <site.path>${project.artifactId}</site.path>
         <apache.maven-site-plugin.version>3.6</apache.maven-site-plugin.version>
         <github.maven-site-plugin.version>0.12</github.maven-site-plugin.version>
         <doxia-module-markdown.version>1.7</doxia-module-markdown.version>
+        <maven-project-info-reports-plugin.version>2.9</maven-project-info-reports-plugin.version>
 
         <!--项目基础依赖配置-->
-        <lombok.version>1.16.16</lombok.version>
+        <lombok.version>1.16.18</lombok.version>
         <logback.version>1.2.3</logback.version>
 
         <!--test-->
-        <junit.version>4.12</junit.version>
-        <junit.jupiter.version>5.0.0-RC2</junit.jupiter.version>
-        <junit.vintage.version>${junit.version}.0-RC2</junit.vintage.version>
-        <junit.platform.version>1.0.0-RC2</junit.platform.version>
+        <junit4.version>4.12</junit4.version>
+        <junit.version>5.0.0</junit.version>
+        <junit.vintage.version>${junit4.version}.0</junit.vintage.version>
+        <junit.platform.version>1.0.2</junit.platform.version>
     </properties>
 
 
@@ -53,11 +106,14 @@
 
     <dependencies>
 
+        <!--通过注解简化代码-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
         </dependency>
+
+        <!--日志平台-->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
@@ -74,38 +130,65 @@
             <version>${logback.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.jupiter.version}</version>
-            <scope>test</scope>
-        </dependency>
+        <!-- tag::tests[] -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <version>${junit4.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-engine</artifactId>
+            <version>${junit.platform.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>${junit.platform.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>${junit.vintage.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- end::tests[] -->
 
     </dependencies>
 
-    <distributionManagement>
-        <site>
-            <id>github-pages-site</id>
-            <name>Deployment through GitHub's site deployment plugin</name>
-            <url>scm:git:git@github.com:laidu/java-learn-site.git</url>
-        </site>
-    </distributionManagement>
+    <profiles>
+        <profile>
+            <id>release</id>
+            <properties>
+                <site.path>release</site.path>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
 
         <pluginManagement>
+            <plugins>
 
+            </plugins>
         </pluginManagement>
 
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -114,35 +197,6 @@
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
-                <configuration>
-                    <includes>
-                        <include>**/Test*.java</include>
-                        <include>**/*Test.java</include>
-                        <include>**/*Tests.java</include>
-                        <include>**/*TestCase.java</include>
-                    </includes>
-                    <properties>
-                        <excludeTags>slow</excludeTags>
-                    </properties>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.junit.platform</groupId>
-                        <artifactId>junit-platform-surefire-provider</artifactId>
-                        <version>${junit.platform.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.junit.jupiter</groupId>
-                        <artifactId>junit-jupiter-engine</artifactId>
-                        <version>${junit.jupiter.version}</version>
-                        <!--<scope>test</scope>-->
-                    </dependency>
-                </dependencies>
             </plugin>
 
             <plugin>
@@ -156,30 +210,89 @@
                         <version>${doxia-module-markdown.version}</version>
                     </dependency>
                 </dependencies>
+
                 <configuration>
-                    <port>9000</port>
-                    <tempWebappDirectory>${basedir}/target/staging</tempWebappDirectory>
                     <skipDeploy>true</skipDeploy>
+                    <reportPlugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-project-info-reports-plugin</artifactId>
+                            <version>${maven-project-info-reports-plugin.version}</version>
+                            <configuration>
+                                <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+                                <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+                            </configuration>
+                        </plugin>
+                        <!--<plugin>-->
+                            <!--<groupId>org.apache.maven.plugins</groupId>-->
+                            <!--<artifactId>maven-javadoc-plugin</artifactId>-->
+                            <!--<version>3.0.0-M1</version>-->
+                        <!--</plugin>-->
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-surefire-report-plugin</artifactId>
+                            <version>2.20.1</version>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-checkstyle-plugin</artifactId>
+                            <version>2.17</version>
+                        </plugin>
+                    </reportPlugins>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.2.1</version>
+                <configuration>
+                    <useReleaseProfile>true</useReleaseProfile>
+                    <goals>deploy site site-deploy</goals>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pdf-plugin</artifactId>
+                <version>1.4</version>
+                <configuration>
+                    <locales>en,fr</locales>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>pdf</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>pdf</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.reporting.outputDirectory}</outputDirectory>
+                            <includeReports>false</includeReports>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
                 <groupId>com.github.github</groupId>
                 <artifactId>site-maven-plugin</artifactId>
                 <version>${github.maven-site-plugin.version}</version>
+
                 <configuration>
                     <message>Creating site for ${project.artifactId}, ${project.version}</message>
                     <!-- this does the trick to place every module in the correct subfolder -->
                     <path>${project.distributionManagement.site.url}</path>
+                    <branch>refs/heads/master</branch>
+                    <force>true</force>
+                    <!--<noJekyll>true</noJekyll>-->
                     <merge>true</merge>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>github-site</id>
                         <goals>
                             <goal>site</goal>
                         </goals>
-                        <phase>site-deploy</phase>
+                        <phase>site</phase>
                     </execution>
                 </executions>
             </plugin>
@@ -187,62 +300,5 @@
         </plugins>
     </build>
 
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jxr-plugin</artifactId>
-                <version>2.5</version>
-                <reportSets>
-                    <reportSet>
-                        <id>aggregate</id>
-                        <inherited>false</inherited>
-                        <reports>
-                            <report>aggregate</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.17</version>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>checkstyle</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-
-        </plugins>
-    </reporting>
-
-    <profiles>
-        <profile>
-            <id>gh-pages</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.github.github</groupId>
-                        <artifactId>site-maven-plugin</artifactId>
-                        <configuration>
-                            <message>Creating site for ${project.version}</message>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>site</goal>
-                                </goals>
-                                <phase>site</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
 </project>
