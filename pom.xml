@@ -9,7 +9,7 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <name>java-learn</name>
-    <url>https://github.com/laidu/java-learn</url>
+    <url>https://laidu.github.io/java-learn</url>
     <description>java 程序员的学习成长之路</description>
 
     <scm>
@@ -61,12 +61,6 @@
         </site>
     </distributionManagement>
 
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
 
     <properties>
 
@@ -78,12 +72,15 @@
 
         <!--mvn site-->
         <github.global.server>github</github.global.server>
-        <github.global.oauth2Token>${env.GITHUB_OAUTH_TOKEN}</github.global.oauth2Token> <!-- 通过获取环境变量设置token 适应travis-ci 自动部署-->
+        <github.global.oauth2Token>${env.GITHUB_OAUTH_TOKEN}
+        </github.global.oauth2Token> <!-- 通过获取环境变量设置token 适应travis-ci 自动部署-->
         <site.path>${project.artifactId}</site.path>
-        <apache.maven-site-plugin.version>3.6</apache.maven-site-plugin.version>
         <github.maven-site-plugin.version>0.12</github.maven-site-plugin.version>
         <doxia-module-markdown.version>1.7</doxia-module-markdown.version>
         <maven-project-info-reports-plugin.version>2.9</maven-project-info-reports-plugin.version>
+        <maven-site-plugin.version>3.7.1</maven-site-plugin.version>
+        <javadoc-plugin.version>3.0.1</javadoc-plugin.version>
+        <markdown-page-generator.version>2.1.0</markdown-page-generator.version>
 
         <!--项目基础依赖配置-->
         <lombok.version>1.16.18</lombok.version>
@@ -96,13 +93,6 @@
         <junit.platform.version>1.0.2</junit.platform.version>
     </properties>
 
-
-    <!--子模块需要显示引入此模块下的依赖，但不需要声明版本号-->
-    <dependencyManagement>
-        <dependencies>
-
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
 
@@ -167,9 +157,11 @@
             <version>${junit.vintage.version}</version>
             <scope>test</scope>
         </dependency>
+
         <!-- end::tests[] -->
 
     </dependencies>
+
 
     <profiles>
         <profile>
@@ -184,7 +176,23 @@
 
         <pluginManagement>
             <plugins>
-
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-scm-publish-plugin</artifactId>
+                    <version>3.0.0</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <!-- svn location for publication -->
+                        <pubScmUrl>scm:git:git@github.com:laidu/java-learn.git</pubScmUrl>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <configuration>
+                        <skipDeploy>true</skipDeploy>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -202,7 +210,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>${apache.maven-site-plugin.version}</version>
+                <version>${maven-site-plugin.version}</version>
+
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.doxia</groupId>
@@ -211,34 +220,64 @@
                     </dependency>
                 </dependencies>
 
+                <executions>
+                    <execution>
+                        <id>stage-for-scm-publish</id>
+                        <phase>post-site</phase>
+                        <goals>
+                            <goal>stage</goal>
+                        </goals>
+                        <configuration>
+                            <skipDeploy>false</skipDeploy>
+                        </configuration>
+                    </execution>
+                </executions>
+                <!--<configuration>-->
+                <!--<skipDeploy>true</skipDeploy>-->
+                <!--<reportPlugins>-->
+                <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-project-info-reports-plugin</artifactId>-->
+                <!--<version>${maven-project-info-reports-plugin.version}</version>-->
+                <!--<configuration>-->
+                <!--<dependencyDetailsEnabled>false</dependencyDetailsEnabled>-->
+                <!--<dependencyLocationsEnabled>false</dependencyLocationsEnabled>-->
+                <!--</configuration>-->
+                <!--</plugin>-->
+                <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-surefire-report-plugin</artifactId>-->
+                <!--<version>2.20.1</version>-->
+                <!--</plugin>-->
+                <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-checkstyle-plugin</artifactId>-->
+                <!--<version>2.17</version>-->
+                <!--</plugin>-->
+                <!--</reportPlugins>-->
+                <!--</configuration>-->
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-publish-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>scm-publish</id>
+                        <phase>site-deploy</phase>
+                        <goals>
+                            <goal>publish-scm</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <skipDeploy>true</skipDeploy>
-                    <reportPlugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-project-info-reports-plugin</artifactId>
-                            <version>${maven-project-info-reports-plugin.version}</version>
-                            <configuration>
-                                <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
-                                <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-                            </configuration>
-                        </plugin>
-                        <!--<plugin>-->
-                            <!--<groupId>org.apache.maven.plugins</groupId>-->
-                            <!--<artifactId>maven-javadoc-plugin</artifactId>-->
-                            <!--<version>3.0.0-M1</version>-->
-                        <!--</plugin>-->
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-surefire-report-plugin</artifactId>
-                            <version>2.20.1</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-checkstyle-plugin</artifactId>
-                            <version>2.17</version>
-                        </plugin>
-                    </reportPlugins>
+                    <testFailureIgnore>true</testFailureIgnore>
                 </configuration>
             </plugin>
 
@@ -251,27 +290,27 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pdf-plugin</artifactId>
-                <version>1.4</version>
-                <configuration>
-                    <locales>en,fr</locales>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>pdf</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>pdf</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.reporting.outputDirectory}</outputDirectory>
-                            <includeReports>false</includeReports>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-pdf-plugin</artifactId>-->
+            <!--<version>1.4</version>-->
+            <!--<configuration>-->
+            <!--<locales>en,fr</locales>-->
+            <!--</configuration>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<id>pdf</id>-->
+            <!--<phase>site</phase>-->
+            <!--<goals>-->
+            <!--<goal>pdf</goal>-->
+            <!--</goals>-->
+            <!--<configuration>-->
+            <!--<outputDirectory>${project.reporting.outputDirectory}</outputDirectory>-->
+            <!--<includeReports>false</includeReports>-->
+            <!--</configuration>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--</plugin>-->
 
             <plugin>
                 <groupId>com.github.github</groupId>
@@ -297,8 +336,10 @@
                 </executions>
             </plugin>
 
+
         </plugins>
     </build>
+
 
 
 </project>
